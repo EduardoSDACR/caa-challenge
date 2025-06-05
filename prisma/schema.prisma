@@ -1,0 +1,115 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model analisis_comentarios {
+  id                Int        @id @default(autoincrement())
+  id_comentario     Int
+  id_candidato      Int
+  score_sentimiento Decimal    @db.Decimal(5, 2)
+  id_posicion       Int
+  comments          comments   @relation(fields: [id_comentario], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_comentario_analisis")
+  candidatos        candidatos @relation(fields: [id_candidato], references: [id], onUpdate: NoAction, map: "fk_comentario_candidato")
+  posicion          posicion   @relation(fields: [id_posicion], references: [id], onUpdate: NoAction, map: "fk_comentario_posicion")
+}
+
+model analisis_transcripciones {
+  id                 Int              @id @default(autoincrement())
+  id_scrapper_result Int
+  id_candidato       Int
+  id_posicion        Int
+  score_sentimientos Decimal          @db.Decimal(5, 2)
+  resumen            String?
+  candidatos         candidatos       @relation(fields: [id_candidato], references: [id], onUpdate: NoAction, map: "fk_transcripciones_candidato")
+  posicion           posicion         @relation(fields: [id_posicion], references: [id], onUpdate: NoAction, map: "fk_transcripciones_posicion")
+  scrapper_results   scrapper_results @relation(fields: [id_scrapper_result], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_transcripciones_scrapper")
+}
+
+model candidatos {
+  id                       Int                        @id @default(autoincrement())
+  nombre                   String                     @db.VarChar(150)
+  partido_politico         String                     @db.VarChar(150)
+  analisis_comentarios     analisis_comentarios[]
+  analisis_transcripciones analisis_transcripciones[]
+}
+
+model channels {
+  id                Int                @id @default(autoincrement())
+  social_network_id Int
+  name              String             @db.VarChar(150)
+  url               String
+  social_networks   social_networks    @relation(fields: [social_network_id], references: [id], onUpdate: NoAction, map: "fk_channels_social_network")
+  scrapper_results  scrapper_results[]
+}
+
+model comments {
+  id                   Int                    @id @default(autoincrement())
+  scrapper_result_id   Int
+  username             String                 @db.VarChar(100)
+  content              String
+  like_count           Int?                   @default(0)
+  date_at              DateTime?              @db.Date
+  analisis_comentarios analisis_comentarios[]
+  scrapper_results     scrapper_results       @relation(fields: [scrapper_result_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  keyword_comentarios  keyword_comentarios[]
+}
+
+model keyword_comentarios {
+  id            Int      @id @default(autoincrement())
+  id_comentario Int
+  id_keyword    Int
+  comments      comments @relation(fields: [id_comentario], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_keyword_comentario")
+  keywords      keywords @relation(fields: [id_keyword], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_keyword_keyword")
+}
+
+model keyword_transcripciones {
+  id                 Int              @id @default(autoincrement())
+  id_scrapper_result Int
+  id_keyword         Int
+  keywords           keywords         @relation(fields: [id_keyword], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_keyword_keyword_transcripcion")
+  scrapper_results   scrapper_results @relation(fields: [id_scrapper_result], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_keyword_scrapper_result")
+}
+
+model keywords {
+  id                      Int                       @id @default(autoincrement())
+  nombre                  String                    @unique @db.VarChar(100)
+  descripcion             String?
+  keyword_comentarios     keyword_comentarios[]
+  keyword_transcripciones keyword_transcripciones[]
+}
+
+model posicion {
+  id                       Int                        @id @default(autoincrement())
+  nombre                   String                     @unique @db.VarChar(50)
+  descripcion              String?
+  created_at               DateTime?                  @default(now()) @db.Timestamp(6)
+  analisis_comentarios     analisis_comentarios[]
+  analisis_transcripciones analisis_transcripciones[]
+}
+
+model scrapper_results {
+  id                       Int                        @id @default(autoincrement())
+  channel_id               Int
+  comment_count            Int?                       @default(0)
+  like_count               Int?                       @default(0)
+  view_count               Int?                       @default(0)
+  scraped_at               DateTime                   @db.Timestamp(6)
+  created_at               DateTime?                  @default(now()) @db.Timestamp(6)
+  transcript               String?
+  video_id                 String?                    @db.VarChar
+  analisis_transcripciones analisis_transcripciones[]
+  comments                 comments[]
+  keyword_transcripciones  keyword_transcripciones[]
+  channels                 channels                   @relation(fields: [channel_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model social_networks {
+  id       Int        @id(map: "social_network_pkey") @default(autoincrement())
+  name     String     @unique(map: "social_network_nombre_key") @db.VarChar(100)
+  channels channels[]
+}
