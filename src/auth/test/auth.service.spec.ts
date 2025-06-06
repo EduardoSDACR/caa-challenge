@@ -2,7 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { faker } from '@faker-js/faker';
 import { createMock } from '@golevelup/ts-jest';
 import * as bcrypt from 'bcrypt';
-import { UnauthorizedException } from '@nestjs/common';
+import {
+  UnauthorizedException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { mockDeep, DeepMockProxy } from 'jest-mock-extended';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -72,6 +75,43 @@ describe('AuthService', () => {
       };
 
       const result = await authService.signIn(input);
+
+      expect(spyCreateToken).toHaveBeenCalledTimes(1);
+      expect(spyGenerateAccessToken).toHaveBeenCalledTimes(1);
+      expect(result).toHaveProperty('accessToken');
+      expect(result).toHaveProperty('exp');
+    });
+  });
+
+  describe('signUp', () => {
+    it('should throw an error if email is already taken', () => {
+      prismaService.user.findUnique.mockResolvedValueOnce(userMock);
+      const input = {
+        fullName: faker.person.firstName(),
+        email: faker.internet.email(),
+        password: faker.lorem.word(),
+      };
+
+      expect(authService.signUp(input)).rejects.toThrow(
+        new UnprocessableEntityException('The email is already taken'),
+      );
+    });
+
+    it('should create a new user and grant access credentials', async () => {
+      prismaService.user.create.mockResolvedValueOnce(userMock);
+      prismaService.token.create.mockResolvedValueOnce(tokenMock);
+      const spyCreateToken = jest.spyOn(authService, 'createToken');
+      const spyGenerateAccessToken = jest.spyOn(
+        authService,
+        'generateAccessToken',
+      );
+      const input = {
+        fullName: faker.person.firstName(),
+        email: faker.internet.email(),
+        password: faker.lorem.word(),
+      };
+
+      const result = await authService.signUp(input);
 
       expect(spyCreateToken).toHaveBeenCalledTimes(1);
       expect(spyGenerateAccessToken).toHaveBeenCalledTimes(1);
