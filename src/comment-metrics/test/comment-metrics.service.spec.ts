@@ -6,6 +6,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { createMock } from '@golevelup/ts-jest';
 import { faker } from '@faker-js/faker/.';
 import { TotalCommentsDto } from '../dto';
+import { FrequentCommentDTO } from '../dto/frequent-comments.dto';
 
 describe('CommentMetricsService', () => {
   let commentMetricsService: CommentMetricsService;
@@ -34,6 +35,34 @@ describe('CommentMetricsService', () => {
       const result = await commentMetricsService.getTotalRegisteredComments();
 
       expect(result).toMatchObject(new TotalCommentsDto({ total }));
+    });
+  });
+
+  describe('getFrequentComments', () => {
+    it('should return frequent comments', async () => {
+      const frequentComments = [
+        {
+          content: faker.lorem.sentence(),
+          _count: { content: faker.number.int() },
+        },
+        {
+          content: faker.lorem.sentence(),
+          _count: { content: faker.number.int() },
+        },
+      ];
+      prismaService.comments.groupBy.mockResolvedValue(frequentComments as any);
+
+      const result = await commentMetricsService.getFrequentComments();
+
+      expect(result).toMatchObject(
+        frequentComments.map(
+          ({ content, _count }) =>
+            new FrequentCommentDTO({
+              content,
+              count: _count.content,
+            }),
+        ),
+      );
     });
   });
 });

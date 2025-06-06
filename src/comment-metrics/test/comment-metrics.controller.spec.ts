@@ -13,7 +13,10 @@ describe('CommentMetricsController', () => {
       providers: [
         {
           provide: CommentMetricsService,
-          useValue: { getTotalRegisteredComments: jest.fn() },
+          useValue: {
+            getTotalRegisteredComments: jest.fn(),
+            getFrequentComments: jest.fn(),
+          },
         },
       ],
     }).compile();
@@ -32,9 +35,24 @@ describe('CommentMetricsController', () => {
 
     const result = await controller.getTotalRegisteredComments();
 
-    expect(result).toEqual(totalCommentsMock);
+    expect(result).toMatchObject(totalCommentsMock);
     expect(
       commentMetricsServiceMock.getTotalRegisteredComments,
     ).toHaveBeenCalled();
+  });
+
+  it('should return frequent comments', async () => {
+    const frequentCommentsMock = [
+      { content: faker.lorem.sentence(), count: faker.number.int() },
+      { content: faker.lorem.sentence(), count: faker.number.int() },
+    ];
+    jest
+      .spyOn(commentMetricsServiceMock, 'getFrequentComments')
+      .mockResolvedValue(frequentCommentsMock);
+
+    const result = await controller.getFrequentComments();
+
+    expect(result).toMatchObject(frequentCommentsMock);
+    expect(commentMetricsServiceMock.getFrequentComments).toHaveBeenCalled();
   });
 });
