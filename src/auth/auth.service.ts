@@ -2,11 +2,12 @@ import {
   Injectable,
   NotFoundException,
   UnauthorizedException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { SignInDto, TokenDto } from './dto';
-import { compare } from 'bcrypt';
+import { SignInDto, SignUpDto, TokenDto } from './dto';
+import { compare, hash } from 'bcrypt';
 import { Prisma, Token } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { PrismaErrorEnum } from '../utils/enum';
@@ -19,7 +20,7 @@ export class AuthService {
     private config: ConfigService,
   ) {}
 
-  async signIn(input: SignInDto) {
+  async signIn(input: SignInDto): Promise<TokenDto> {
     const user = await this.prisma.user.findUnique({
       where: {
         email: input.email,
@@ -35,6 +36,28 @@ export class AuthService {
     if (!passwordIsValid) {
       throw new UnauthorizedException('Credentials are wrong');
     }
+
+    const token = await this.createToken(user.id);
+
+    return this.generateAccessToken(token.jti);
+  }
+
+  async signUp({ password, ...input }: SignUpDto): Promise<TokenDto> {
+    const userFound = await this.prisma.user.findUnique({
+      where: { email: input.email },
+      select: { id: true },
+    });
+
+    if (userFound) {
+      throw new UnprocessableEntityException('The email is already taken');
+    }
+
+    const user = await this.prisma.user.create({
+      data: {
+        ...input,
+        hash: await hash(password, 10),
+      },
+    });
 
     const token = await this.createToken(user.id);
 
