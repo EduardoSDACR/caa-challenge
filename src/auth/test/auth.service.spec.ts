@@ -3,10 +3,11 @@ import { faker } from '@faker-js/faker';
 import { createMock } from '@golevelup/ts-jest';
 import * as bcrypt from 'bcrypt';
 import {
+  NotFoundException,
   UnauthorizedException,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { mockDeep, DeepMockProxy } from 'jest-mock-extended';
 import { PrismaService } from '../../prisma/prisma.service';
 import { SignInDto } from '../dto';
@@ -117,6 +118,28 @@ describe('AuthService', () => {
       expect(spyGenerateAccessToken).toHaveBeenCalledTimes(1);
       expect(result).toHaveProperty('accessToken');
       expect(result).toHaveProperty('exp');
+    });
+  });
+
+  describe('logOut', () => {
+    it('should throw an error when user session is not found', async () => {
+      prismaService.token.delete.mockRejectedValue(
+        new Prisma.PrismaClientKnownRequestError('', {
+          code: 'P2025',
+          clientVersion: '4.15.0',
+        }),
+      );
+
+      await expect(authService.logOut(faker.string.nanoid())).rejects.toThrow(
+        new NotFoundException('Session not found'),
+      );
+    });
+
+    it('should delete user session', async () => {
+      prismaService.token.delete.mockResolvedValueOnce(tokenMock);
+      const result = await authService.logOut(faker.string.nanoid());
+
+      expect(result).toBeUndefined();
     });
   });
 });
