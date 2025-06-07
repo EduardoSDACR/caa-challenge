@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CommentMetricsController } from '../comment-metrics.controller';
 import { CommentMetricsService } from '../comment-metrics.service';
 import { faker } from '@faker-js/faker/.';
+import { BadRequestException } from '@nestjs/common';
 import { get } from 'http';
 
 describe('CommentMetricsController', () => {
@@ -19,6 +20,7 @@ describe('CommentMetricsController', () => {
             getFrequentComments: jest.fn(),
             getMostMentionedWords: jest.fn(),
             getFeelingDistribution: jest.fn(),
+            getNumberOfComments: jest.fn(),
           },
         },
       ],
@@ -85,5 +87,32 @@ describe('CommentMetricsController', () => {
 
     expect(result).toMatchObject(feelingDistributionMock);
     expect(commentMetricsServiceMock.getFeelingDistribution).toHaveBeenCalled();
+  });
+
+  it('should throw BadRequestException for invalid mode in getNumberOfComments', async () => {
+    try {
+      await controller.getNumberOfComments('invalid');
+    } catch (error) {
+      expect(error).toBeInstanceOf(BadRequestException);
+      expect(error.message).toBe(
+        'The query "mode" must be either "days" or "weeks"',
+      );
+    }
+  });
+
+  it('should return number of comments for valid mode', async () => {
+    const numberOfCommentsMock = [
+      { date: '2025-01-01', count: faker.number.int() },
+    ];
+    jest
+      .spyOn(commentMetricsServiceMock, 'getNumberOfComments')
+      .mockResolvedValue(numberOfCommentsMock);
+
+    const result = await controller.getNumberOfComments('days');
+
+    expect(result).toMatchObject(numberOfCommentsMock);
+    expect(commentMetricsServiceMock.getNumberOfComments).toHaveBeenCalledWith(
+      'days',
+    );
   });
 });

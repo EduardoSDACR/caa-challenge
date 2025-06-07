@@ -8,6 +8,7 @@ import { faker } from '@faker-js/faker/.';
 import { TotalCommentsDto } from '../dto';
 import { FrequentCommentDTO } from '../dto/frequent-comments.dto';
 import { FeelingDistributionDto } from '../dto/feeling-distribution.dto';
+import { NumberOfCommentsDto } from '../dto/number-of-comments.dto';
 
 describe('CommentMetricsService', () => {
   let commentMetricsService: CommentMetricsService;
@@ -114,6 +115,33 @@ describe('CommentMetricsService', () => {
           neutral: 13,
         }),
       );
+    });
+  });
+
+  describe('getNumberOfComments', () => {
+    it('should return number of comments by days', async () => {
+      const mode = 'days';
+      const comments = [{ scraped_at: new Date('2023-01-01') }];
+      prismaService.scrapper_results.groupBy.mockResolvedValue(comments as any);
+
+      const result = await commentMetricsService.getNumberOfComments(mode);
+
+      expect(result).toBeInstanceOf(Array);
+      expect(result.length).toBe(8);
+      expect(result[0]).toBeInstanceOf(NumberOfCommentsDto);
+    });
+
+    it('should return number of comments by weeks', async () => {
+      const mode = 'weeks';
+      const comments = [{ scraped_at: new Date('2023-01-01') }];
+      prismaService.scrapper_results.groupBy.mockResolvedValue(comments as any);
+
+      const result = await commentMetricsService.getNumberOfComments(mode);
+
+      expect(result).toBeInstanceOf(Array);
+      expect(result.length).toBe(7);
+      expect(result[0]).toBeInstanceOf(NumberOfCommentsDto);
+      expect(result[0].date).toContain(' - ');
     });
   });
 });
