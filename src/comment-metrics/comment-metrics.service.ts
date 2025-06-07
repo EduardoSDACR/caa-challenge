@@ -35,4 +35,29 @@ export class CommentMetricsService {
         }),
     );
   }
+
+  async getMostMentionedWords(): Promise<String[]> {
+    const words = await this.prisma.keyword_transcripciones.groupBy({
+      by: ['id_keyword'],
+      _count: {
+        id_keyword: true,
+      },
+      orderBy: {
+        _count: {
+          id_keyword: 'desc',
+        },
+      },
+      take: 10,
+    });
+    const words_ids = words.map(({ id_keyword }) => id_keyword);
+    const keywords = await this.prisma.keywords.findMany({
+      where: {
+        id: {
+          in: words_ids,
+        },
+      },
+    });
+
+    return keywords.map(({ nombre }) => nombre);
+  }
 }

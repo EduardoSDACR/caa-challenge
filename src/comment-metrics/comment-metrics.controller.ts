@@ -25,4 +25,9 @@ export class CommentMetricsController {
   getFrequentComments(): Promise<FrequentCommentDTO[]> {
     return this.commentMetricsService.getFrequentComments();
   }
+
+  @Get('most-mentioned-words')
+  getMostMentionedWords(): Promise<String[]> {
+    return this.commentMetricsService.getMostMentionedWords();
+  }
 }
