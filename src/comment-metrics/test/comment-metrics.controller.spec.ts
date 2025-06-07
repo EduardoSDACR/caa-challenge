@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CommentMetricsController } from '../comment-metrics.controller';
 import { CommentMetricsService } from '../comment-metrics.service';
 import { faker } from '@faker-js/faker/.';
+import { get } from 'http';
 
 describe('CommentMetricsController', () => {
   let controller: CommentMetricsController;
@@ -16,6 +17,7 @@ describe('CommentMetricsController', () => {
           useValue: {
             getTotalRegisteredComments: jest.fn(),
             getFrequentComments: jest.fn(),
+            getMostMentionedWords: jest.fn(),
           },
         },
       ],
@@ -54,5 +56,17 @@ describe('CommentMetricsController', () => {
 
     expect(result).toMatchObject(frequentCommentsMock);
     expect(commentMetricsServiceMock.getFrequentComments).toHaveBeenCalled();
+  });
+
+  it('should return most mentioned words', async () => {
+    const mostMentionedWordsMock = [faker.lorem.word(), faker.lorem.word()];
+    jest
+      .spyOn(commentMetricsServiceMock, 'getMostMentionedWords')
+      .mockResolvedValue(mostMentionedWordsMock);
+
+    const result = await controller.getMostMentionedWords();
+
+    expect(result).toMatchObject(mostMentionedWordsMock);
+    expect(commentMetricsServiceMock.getMostMentionedWords).toHaveBeenCalled();
   });
 });

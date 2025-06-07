@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CommentMetricsService } from '../comment-metrics.service';
 import { DeepMockProxy, mockDeep } from 'jest-mock-extended';
-import { PrismaClient } from '@prisma/client';
+import { keywords, PrismaClient } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { createMock } from '@golevelup/ts-jest';
 import { faker } from '@faker-js/faker/.';
@@ -63,6 +63,33 @@ describe('CommentMetricsService', () => {
             }),
         ),
       );
+    });
+  });
+
+  describe('getMostMentionedWords', () => {
+    it('should return most mentioned words', async () => {
+      const words = [
+        {
+          id_keyword: faker.number.int(),
+          _count: { id_keyword: faker.number.int() },
+        },
+        {
+          id_keyword: faker.number.int(),
+          _count: { id_keyword: faker.number.int() },
+        },
+      ];
+      prismaService.keyword_transcripciones.groupBy.mockResolvedValue(
+        words as any,
+      );
+      const keywords = [
+        { id: words[0].id_keyword, nombre: faker.lorem.word() },
+        { id: words[1].id_keyword, nombre: faker.lorem.word() },
+      ];
+      prismaService.keywords.findMany.mockResolvedValue(keywords as keywords[]);
+
+      const result = await commentMetricsService.getMostMentionedWords();
+
+      expect(result).toMatchObject(keywords.map(({ nombre }) => nombre));
     });
   });
 });
