@@ -18,6 +18,7 @@ describe('CommentMetricsController', () => {
             getTotalRegisteredComments: jest.fn(),
             getFrequentComments: jest.fn(),
             getMostMentionedWords: jest.fn(),
+            getFeelingDistribution: jest.fn(),
           },
         },
       ],
@@ -68,5 +69,21 @@ describe('CommentMetricsController', () => {
 
     expect(result).toMatchObject(mostMentionedWordsMock);
     expect(commentMetricsServiceMock.getMostMentionedWords).toHaveBeenCalled();
+  });
+
+  it('should return feeling distribution', async () => {
+    const feelingDistributionMock = {
+      positive: faker.number.int(),
+      negative: faker.number.int(),
+      neutral: faker.number.int(),
+    };
+    jest
+      .spyOn(commentMetricsServiceMock, 'getFeelingDistribution')
+      .mockResolvedValue(feelingDistributionMock);
+
+    const result = await controller.getFeelingDistribution();
+
+    expect(result).toMatchObject(feelingDistributionMock);
+    expect(commentMetricsServiceMock.getFeelingDistribution).toHaveBeenCalled();
   });
 });

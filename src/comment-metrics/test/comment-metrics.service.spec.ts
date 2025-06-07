@@ -7,6 +7,7 @@ import { createMock } from '@golevelup/ts-jest';
 import { faker } from '@faker-js/faker/.';
 import { TotalCommentsDto } from '../dto';
 import { FrequentCommentDTO } from '../dto/frequent-comments.dto';
+import { FeelingDistributionDto } from '../dto/feeling-distribution.dto';
 
 describe('CommentMetricsService', () => {
   let commentMetricsService: CommentMetricsService;
@@ -90,6 +91,29 @@ describe('CommentMetricsService', () => {
       const result = await commentMetricsService.getMostMentionedWords();
 
       expect(result).toMatchObject(keywords.map(({ nombre }) => nombre));
+    });
+  });
+
+  describe('getFeelingDistribution', () => {
+    it('should return feeling distribution', async () => {
+      const positionCounts = [
+        { id_posicion: 1, _count: { id_posicion: 120 } },
+        { id_posicion: 2, _count: { id_posicion: 90 } },
+        { id_posicion: 3, _count: { id_posicion: 30 } },
+      ];
+      prismaService.analisis_transcripciones.groupBy.mockResolvedValue(
+        positionCounts as any,
+      );
+
+      const result = await commentMetricsService.getFeelingDistribution();
+
+      expect(result).toMatchObject(
+        new FeelingDistributionDto({
+          positive: 50,
+          negative: 38,
+          neutral: 13,
+        }),
+      );
     });
   });
 });
