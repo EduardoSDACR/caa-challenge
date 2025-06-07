@@ -9,6 +9,7 @@ import { TotalCommentsDto } from './dto';
 import { CommentMetricsService } from './comment-metrics.service';
 import { JwtGuard } from '../auth/guard/jwt.guard';
 import { FrequentCommentDTO } from './dto/frequent-comments.dto';
+import { FeelingDistributionDto } from './dto/feeling-distribution.dto';
 
 @UseGuards(JwtGuard)
 @UseInterceptors(ClassSerializerInterceptor)
@@ -29,5 +30,10 @@ export class CommentMetricsController {
   @Get('most-mentioned-words')
   getMostMentionedWords(): Promise<String[]> {
     return this.commentMetricsService.getMostMentionedWords();
+  }
+
+  @Get('feeling-distribution')
+  getFeelingDistribution(): Promise<FeelingDistributionDto> {
+    return this.commentMetricsService.getFeelingDistribution();
   }
 }
