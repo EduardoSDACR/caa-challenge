@@ -19,16 +19,25 @@ export const authOptions = {
           }
         );
 
-        const { accessToken } = await res.json();
+        const data = await res.json();
 
         if (res.ok) {
-          return accessToken;
+          return data;
         }
 
         throw new Error("Wrong credentials");
       },
     }),
   ],
+  callbacks: {
+    async jwt({ token, user }) {
+      return { ...token, ...user };
+    },
+    async session({ session, token }) {
+      session.user = token as any;
+      return session;
+    },
+  },
   pages: {
     signIn: "/auth/signin",
   },
