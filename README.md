@@ -47,7 +47,7 @@ A full-stack application built with NestJS (backend) and Next.js (frontend) for 
     ```
 2. Install dependencies:
     ```
-   cd frontend
+   npm install 
     ```
 3. Create a .env file in the frontend root directory with the following variables:
     ```
