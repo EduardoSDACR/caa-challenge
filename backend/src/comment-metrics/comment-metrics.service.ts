@@ -49,7 +49,7 @@ export class CommentMetricsService {
           id_keyword: 'desc',
         },
       },
-      take: 10,
+      take: 20,
     });
 
     const mostUsedWords = words.map(async ({ _count, id_keyword }) => {
