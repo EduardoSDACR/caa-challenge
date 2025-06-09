@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CommentMetricsService } from '../comment-metrics.service';
 import { DeepMockProxy, mockDeep } from 'jest-mock-extended';
-import { keywords, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { createMock } from '@golevelup/ts-jest';
 import { faker } from '@faker-js/faker/.';
@@ -83,15 +83,21 @@ describe('CommentMetricsService', () => {
       prismaService.keyword_transcripciones.groupBy.mockResolvedValue(
         words as any,
       );
-      const keywords = [
-        { id: words[0].id_keyword, nombre: faker.lorem.word() },
-        { id: words[1].id_keyword, nombre: faker.lorem.word() },
-      ];
-      prismaService.keywords.findMany.mockResolvedValue(keywords as keywords[]);
+      const keyword = {
+        id: faker.number.int(),
+        nombre: 'word',
+        descripcion: faker.lorem.sentence(),
+      };
+      prismaService.keywords.findUniqueOrThrow.mockResolvedValue(
+        keyword as any,
+      );
 
       const result = await commentMetricsService.getMostMentionedWords();
 
-      expect(result).toMatchObject(keywords.map(({ nombre }) => nombre));
+      expect(result).toMatchObject([
+        { word: 'word', count: words[0]._count.id_keyword },
+        { word: 'word', count: words[1]._count.id_keyword },
+      ]);
     });
   });
 

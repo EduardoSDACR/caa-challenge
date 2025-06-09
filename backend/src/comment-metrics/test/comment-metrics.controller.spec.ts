@@ -3,7 +3,6 @@ import { CommentMetricsController } from '../comment-metrics.controller';
 import { CommentMetricsService } from '../comment-metrics.service';
 import { faker } from '@faker-js/faker/.';
 import { BadRequestException } from '@nestjs/common';
-import { get } from 'http';
 
 describe('CommentMetricsController', () => {
   let controller: CommentMetricsController;
@@ -62,7 +61,10 @@ describe('CommentMetricsController', () => {
   });
 
   it('should return most mentioned words', async () => {
-    const mostMentionedWordsMock = [faker.lorem.word(), faker.lorem.word()];
+    const mostMentionedWordsMock = [
+      { word: faker.lorem.sentence(), count: faker.number.int() },
+      { word: faker.lorem.sentence(), count: faker.number.int() },
+    ];
     jest
       .spyOn(commentMetricsServiceMock, 'getMostMentionedWords')
       .mockResolvedValue(mostMentionedWordsMock);
