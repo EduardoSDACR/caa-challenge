@@ -100,7 +100,6 @@ function FrequentCommentsTable() {
 
   return (
     <div className="p-4 bg-white rounded-lg shadow">
-      <h2 className="text-lg font-semibold mb-4">Frequent comments</h2>
       <div className="flex items-center space-x-2">
         <span className="text-sm text-gray-600">Items per page:</span>
         <select

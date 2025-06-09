@@ -109,9 +109,8 @@ function NumberCommentsChart() {
   }
 
   return (
-    <div className="p-4 bg-white rounded-lg shadow w-1/2">
+    <div className="p-4 bg-white rounded-lg shadow">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold">Number of comments</h2>
         <h2 className="text-lg font-semibold">
           {timeRange === "day" ? "Daily Metrics" : "Weekly Metrics"}
         </h2>

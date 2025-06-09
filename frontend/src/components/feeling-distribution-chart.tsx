@@ -90,8 +90,7 @@ function FeelingDistributionChart() {
   }
 
   return (
-    <div className="p-4 bg-white rounded-lg shadow w-1/3">
-      <h2 className="text-lg font-semibold mb-4">Feelings distribution</h2>
+    <div className="p-4 bg-white rounded-lg shadow">
       <div className="h-80">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
