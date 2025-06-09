@@ -60,3 +60,10 @@ A full-stack application built with NestJS (backend) and Next.js (frontend) for 
     ```
    npm run dev
    ```
+
+### Docker
+
+It's posible to use docker compose to launch the entire application:
+```
+docker compose up -d
+```
