@@ -47,11 +47,12 @@ A full-stack application built with NestJS (backend) and Next.js (frontend) for 
     ```
 2. Install dependencies:
     ```
-   cd frontend
+   npm install 
     ```
 3. Create a .env file in the frontend root directory with the following variables:
     ```
-   NEXT_PUBLIC_API_URL=http://localhost:4000 (it's the backend URL)
+    NEXT_PUBLIC_API_URL=http://localhost:4000 (it's the backend URL for client side components)
+    API_URL=http://localhost:4000 (it's the backend URL for server side components)
     NEXTAUTH_URL=http://localhost:3000 (it's the frontend URL)
     NEXTAUTH_SECRET=your_nextauth_secret_key
    ```
