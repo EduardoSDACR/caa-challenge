@@ -7,7 +7,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { TotalCommentsDto } from './dto';
+import { MostMentionedWordDto, TotalCommentsDto } from './dto';
 import { CommentMetricsService } from './comment-metrics.service';
 import { JwtGuard } from '../auth/guard/jwt.guard';
 import { FrequentCommentDTO } from './dto/frequent-comments.dto';
@@ -31,7 +31,7 @@ export class CommentMetricsController {
   }
 
   @Get('most-mentioned-words')
-  getMostMentionedWords(): Promise<String[]> {
+  getMostMentionedWords(): Promise<MostMentionedWordDto[]> {
     return this.commentMetricsService.getMostMentionedWords();
   }
 

@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { TotalCommentsDto } from './dto';
+import { MostMentionedWordDto, TotalCommentsDto } from './dto';
 import { FrequentCommentDTO } from './dto/frequent-comments.dto';
 import { FeelingDistributionDto } from './dto/feeling-distribution.dto';
-import { da } from '@faker-js/faker/.';
 import { NumberOfCommentsDto } from './dto/number-of-comments.dto';
 
 @Injectable()
@@ -39,7 +38,7 @@ export class CommentMetricsService {
     );
   }
 
-  async getMostMentionedWords(): Promise<String[]> {
+  async getMostMentionedWords(): Promise<MostMentionedWordDto[]> {
     const words = await this.prisma.keyword_transcripciones.groupBy({
       by: ['id_keyword'],
       _count: {
@@ -50,18 +49,20 @@ export class CommentMetricsService {
           id_keyword: 'desc',
         },
       },
-      take: 10,
-    });
-    const words_ids = words.map(({ id_keyword }) => id_keyword);
-    const keywords = await this.prisma.keywords.findMany({
-      where: {
-        id: {
-          in: words_ids,
-        },
-      },
+      take: 20,
     });
 
-    return keywords.map(({ nombre }) => nombre);
+    const mostUsedWords = words.map(async ({ _count, id_keyword }) => {
+      const word = await this.prisma.keywords.findUniqueOrThrow({
+        where: { id: id_keyword },
+      });
+      return new MostMentionedWordDto({
+        word: word.nombre,
+        count: _count.id_keyword,
+      });
+    });
+
+    return await Promise.all(mostUsedWords);
   }
 
   async getFeelingDistribution(): Promise<FeelingDistributionDto> {
